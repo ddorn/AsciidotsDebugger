@@ -51,13 +51,17 @@ And in the future
 
 #### Installation and use
 
-In the folder you want:
+The grapical interface is based on pygame, so you need to have it installed.
+
+    pip install pygame
+
+Then in the folder you want:
     
     git clone https://github.com/ddorn/AsciidotsDebugger
     cd AsciidotsDebugger
     python debugger.py samples/fibonnaci.dots
 
-And enjoy it !
+Enjoy it !
 
 ### Remarks
 
