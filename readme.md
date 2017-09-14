@@ -29,6 +29,16 @@ And in the future
 - edit the code directly in the app
 - Make gifs of your code 
 
+#### Controls
+
+- <kbd>Right</kbd> : Next step
+- <kbd>Left</kbd> : Previous step
+- <kbd>Ctrl + Right</kbd> : 5th next step
+- <kbd>Ctrl + Left</kbd> : 5th previous step
+- <kbd>-</kbd> Decrease font size
+- <kbd>+</kbd> or <kbd>=</kbd> Increase font size
+
+
 #### Installation and use
 
 In the folder you want:
