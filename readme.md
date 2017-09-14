@@ -19,15 +19,23 @@ This is where this graphical debugger comes.
 
 ### The Graphical Debugger
 
+![There is a lot of colors](assets/colors.png)
+
 #### Features
 With this, you will be able to:
 - play with the time and go back to see where dots comes from
-- enjoy enven more the beauty of ascii-art with nice colors
+- zoom on your code
+- drag your code around in the windows to explore other parts
+- enjoy even more the beauty of ascii-art with nice colors and font
+- Don't get distracted with the clean fullscreen
 
 And in the future
 - Click on dots to see their values and id
 - edit the code directly in the app
+- See the ouput of your code, give inputs
 - Make gifs of your code 
+
+![Play with the time](assets/play_with_time.gif)
 
 #### Controls
 
@@ -37,7 +45,9 @@ And in the future
 - <kbd>Ctrl + Left</kbd> : 5th previous step
 - <kbd>-</kbd> Decrease font size
 - <kbd>+</kbd> or <kbd>=</kbd> Increase font size
+- Click and drag to move the code
 
+![Drag your code](assets/move_around.gif)
 
 #### Installation and use
 
