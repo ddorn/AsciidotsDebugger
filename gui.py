@@ -129,7 +129,7 @@ class PygameDebugger:
                     color = WRAP
                 elif char.isLibWarp():
                     color = LIBVRAP
-                elif char in '@#$':
+                elif char in '@#$&':
                     color = MODES
                 else:
                     color = REGULAR
