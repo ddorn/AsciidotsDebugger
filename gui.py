@@ -62,6 +62,8 @@ class PygameDebugger:
         self.current_tick = -1
         self.font_size = 16
         self.char_size = 0, 0   # set by self.set_font
+        self.offset = Pos(5, 5)
+        self.mouse_drag_pos = None
 
         self.screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)  # type: pygame.SurfaceType
         self.font = self.new_font(self.font_size)  # type: pygame.font.FontType
@@ -93,6 +95,15 @@ class PygameDebugger:
                     self.font = self.new_font(self.font_size + 1)
                 elif e.key == pygame.K_MINUS:
                     self.font = self.new_font(self.font_size - 1)
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                self.mouse_drag_pos = pygame.mouse.get_pos()
+            elif e.type == pygame.MOUSEBUTTONUP:
+                self.mouse_drag_pos = None
+
+        if self.mouse_drag_pos is not None:
+            actual_pos = pygame.mouse.get_pos()
+            self.offset += Pos(*actual_pos) - self.mouse_drag_pos
+            self.mouse_drag_pos = actual_pos
 
         while self.current_tick >= len(self.ticks) and not self.env.io.finished:
             tick = self._get_new_tick()
@@ -139,11 +150,11 @@ class PygameDebugger:
                 else:
                     surf = self._get_surface_for_char(c, color, BACKGROUND)
 
-                pos = 5 + self.char_size[0] * col, 5 + self.char_size[1] * row
+                pos = self.offset[0] + self.char_size[0] * col, self.offset[1] + self.char_size[1] * row
                 self.screen.blit(surf, pos)
 
     def new_font(self, size):
-        size = min(60, max(2, size))  # clamp
+        size = min(80, max(2, size))  # clamp
         self.font_size = size
         self._get_surface_for_char.cache_clear()
         font = pygame.font.Font(FONTNAME, size)
