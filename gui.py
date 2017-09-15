@@ -104,6 +104,7 @@ class Dot:
         screen.blit(self.tooltip, rect)
 
     def get_tooltip(self):
+        """"""
         text = "#{} @{} ~{}".format(self.value, self.id, self.state)
         hashsurf = self.render_text('#')
         value = self.render_text(str(self.value))
@@ -223,6 +224,7 @@ class PygameDebugger:
             self.prints[self.current_tick] = Message(self.io.outputs.get(), (x, 0), 'topright')
 
     def map_to_screen_pos(self, pos):
+        """Convert the position of char/dot in the map to its coordinates in the screen."""
         return self.offset.x + self.char_size.x * pos.col, self.offset.y + self.char_size.y * pos.row
 
     def render(self):
@@ -234,49 +236,33 @@ class PygameDebugger:
             dot_pos = {dot.pos for dot in self.ticks[self.current_tick]}
 
         mouse = pygame.mouse.get_pos()
-        xstep = Pos(1, 0)
 
         for row, line in enumerate(self.env.world.map):
             for col, char in enumerate(line):
                 c = char
                 pos = Pos(col, row)
+                screen_pos = self.map_to_screen_pos(pos)
 
-                if char.isOper():
-                    color = OPERATOR
-                elif c in '[{' and self.env.world.does_loc_exist(pos + xstep) and self.env.world.get_char_at(
-                                pos + xstep).isOper():
-                    color = BRACKETS
-                elif c in '}]' and self.env.world.does_loc_exist(pos - xstep) and self.env.world.get_char_at(
-                                pos - xstep).isOper():
-                    color = BRACKETS
-                elif c in '~*':
-                    color = CONTROL_FLOW
-                elif c in '<>v^':
-                    color = CONTROL_DIR
-                elif c.isdigit():
-                    color = DIGIT
-                elif char.isWarp():
-                    color = WRAP
-                elif char.isLibWarp():
-                    color = LIBVRAP
-                elif char in '@#$&':
-                    color = MODES
-                else:
-                    color = REGULAR
+                # we don't want to render the char that are outside the screen
+                if not pygame.Rect(screen_pos, self.char_size).colliderect(self.screen.get_rect()):
+                    continue
 
-                # color depends if there is a dot or not
+                color = self.char_to_color(char, pos)
+
+                # background depends if there is a dot or not
                 if pos in dot_pos:
                     surf = self._get_surface_for_char(c, color, DOT)
                 else:
                     surf = self._get_surface_for_char(c, color, BACKGROUND)
-                self.screen.blit(surf, self.map_to_screen_pos(pos))
+                self.screen.blit(surf, screen_pos)
 
+        # Show output
         current_msg = self.get_current_message()
         if current_msg:
             current_msg.render(self.screen)
 
+        # Tooltip
         for dot in self.current_dots:
-
             # if there is more than one dot at this place, we want to show only one
             # the first dot that has this pos
             if pygame.Rect(self.map_to_screen_pos(dot.pos), self.char_size).collidepoint(*mouse):
@@ -295,6 +281,30 @@ class PygameDebugger:
         ticks = list(filter(lambda x: x <= self.current_tick, self.prints.keys()))
         if ticks:
             return self.prints[sorted(ticks)[-1]]
+
+    def char_to_color(self, char, pos):
+        if char.isOper():
+            return OPERATOR
+        if char in '[{' and self.env.world.does_loc_exist(pos + Pos(1, 0)) and self.env.world.get_char_at(
+                        pos + Pos(1, 0)).isOper():
+            return BRACKETS
+        if char in '}]' and self.env.world.does_loc_exist(pos - Pos(1, 0)) and self.env.world.get_char_at(
+                        pos - Pos(1, 0)).isOper():
+            return BRACKETS
+        if char in '~*':
+            return CONTROL_FLOW
+        if char in '<>v^':
+            return CONTROL_DIR
+        if char.isdigit():
+            return DIGIT
+        if char.isWarp():
+            return WRAP
+        if char.isLibWarp():
+            return LIBVRAP
+        if char in '@#$&':
+            return MODES
+
+        return REGULAR
 
     @property
     def current_dots(self):
