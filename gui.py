@@ -3,6 +3,7 @@ from functools import lru_cache
 from typing import Dict, List
 
 import pygame
+import pygame.gfxdraw
 
 from dots.vector import Pos
 
@@ -73,7 +74,7 @@ class Message:
         self.surf = self.get_surf()
 
     def get_surf(self):
-        return self.FONT.render(self.text, 1, COLORS[MSG], COLORS[MSG_BG])
+        return self.FONT.render(self.text, 1, COLORS[MSG], COLORS[MSG_BG]).convert()
 
 
 class Dot:
@@ -93,12 +94,44 @@ class Dot:
 
     def show(self, screen, pos):
         if self.tooltip is None:
-            self.tooltip = self.get_tooltip()
+            self.tooltip = self.get_tooltip()  # type: pygame.SurfaceType
 
-        screen.blit(self.tooltip, pos + Pos(13, 13))
+        rect = self.tooltip.get_rect()  # type: pygame.rect.RectType
+        rect.topleft = pos + Pos(10, 10)
+
+        points = rect.topleft, rect.topright, rect.bottomright, rect.bottomleft
+        pygame.gfxdraw.filled_polygon(screen, points, COLORS[BACKGROUND] + (180,))
+        screen.blit(self.tooltip, rect)
 
     def get_tooltip(self):
-        return self.FONT.render("#{} @{} - {}".format(self.value, self.id, self.state), 1, COLORS[MSG])
+        text = "#{} @{} ~{}".format(self.value, self.id, self.state)
+        hashsurf = self.render_text('#')
+        value = self.render_text(str(self.value))
+        sep = self.render_text(' ')
+        atsurf = self.render_text('@')
+        idsurf = self.render_text(str(self.id))
+        state_sep = self.render_text('~')
+        end = self.render_text(self.state)
+
+        pos = 0
+        surf = pygame.Surface(self.FONT.size(text))
+        surf.set_colorkey((0, 0, 0))
+        for s in (hashsurf, value, sep, atsurf, idsurf, sep, state_sep, end):
+            surf.blit(s, (pos, 0))
+            pos += s.get_width()
+
+        return surf
+
+    @classmethod
+    @lru_cache(maxsize=None)
+    def render_text(cls, text):
+        if text == '#':
+            return cls.FONT.render(text, 1, COLORS[MODES])
+        if text == '@':
+            return cls.FONT.render(text, 1, COLORS[OPERATOR])
+        if text == '~':
+            return cls.FONT.render(text, 1, COLORS[CONTROL_FLOW])
+        return cls.FONT.render(text, 1, COLORS[MSG])
 
 
 class PygameDebugger:
@@ -276,7 +309,7 @@ class PygameDebugger:
 
     @lru_cache(maxsize=None)
     def _get_surface_for_char(self, char, color, background):
-        return self.font.render(char, True, COLORS[color], COLORS[background])
+        return self.font.render(char, True, COLORS[color], COLORS[background]).convert()
 
     @property
     def io(self):
