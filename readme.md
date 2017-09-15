@@ -24,16 +24,18 @@ This is where this graphical debugger comes.
 #### Features
 With this, you will be able to:
 - play with the time and go back to see where dots comes from
-- zoom on your code
-- drag your code around in the windows to explore other parts
-- enjoy even more the beauty of ascii-art with nice colors and font
+- See the value and id of a dot when you hover it
+- Zoom on your code
+- Drag your code around in the windows to explore other parts
+- But don't get lost in the code because you can reset the view
+- Enjoy even more the beauty of ascii-art with nice colors and font
 - Don't get distracted with the clean fullscreen
-- Don't get lost in the code and reset the view
 
 And in the future
-- Click on dots to see their values and id
-- edit the code directly in the app
-- See the ouput of your code, give inputs
+- See the values of all dots at the same place
+- See all output at the same time
+- Edit the code directly in the app
+- Give inputs to your code
 - Make gifs of your code 
 
 ![Play with the time](assets/play_with_time.gif)
