@@ -50,6 +50,7 @@ class CallbacksRelay(IOCallbacksStorage):
 
     def on_output(self, value):
         self.outputs.put(value)
+        print(value, end='')
 
     def on_finish(self):
         self.finished = True
