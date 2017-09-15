@@ -90,6 +90,17 @@ class Dot:
         self.value = dot.value
 
         self.tooltip = None  # type: pygame.SurfaceType
+
+    def show(self, screen, pos):
+        if self.tooltip is None:
+            self.tooltip = self.get_tooltip()
+
+        screen.blit(self.tooltip, pos + Pos(13, 13))
+
+    def get_tooltip(self):
+        return self.FONT.render("#{} @{} - {}".format(self.value, self.id, self.state), 1, COLORS[MSG])
+
+
 class PygameDebugger:
     FPS = 60
 
@@ -231,6 +242,13 @@ class PygameDebugger:
         if current_msg:
             current_msg.render(self.screen)
 
+        for dot in self.current_dots:
+
+            # if there is more than one dot at this place, we want to show only one
+            # the first dot that has this pos
+            if pygame.Rect(self.map_to_screen_pos(dot.pos), self.char_size).collidepoint(*mouse):
+                dot.show(self.screen, mouse)
+                break
 
     def new_font(self, size):
         size = min(80, max(2, size))  # clamp
