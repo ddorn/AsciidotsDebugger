@@ -28,6 +28,7 @@ With this, you will be able to:
 - drag your code around in the windows to explore other parts
 - enjoy even more the beauty of ascii-art with nice colors and font
 - Don't get distracted with the clean fullscreen
+- Don't get lost in the code and reset the view
 
 And in the future
 - Click on dots to see their values and id
@@ -45,6 +46,7 @@ And in the future
 - <kbd>Ctrl + Left</kbd> : 5th previous step
 - <kbd>-</kbd> Decrease font size
 - <kbd>+</kbd> or <kbd>=</kbd> Increase font size
+- <kbd>Ctrl + R</kbd> Reset the view (size and pos)
 - Click and drag to move the code
 
 ![Drag your code](assets/move_around.gif)
