@@ -61,9 +61,12 @@ class PygameDebugger:
 
         self.current_tick = -1
         self.font_size = 16
-        self.char_size = 0, 0   # set by self.set_font
+        #  set by self.set_font
+        self.char_size = None  # type: Pos
+
         self.offset = Pos(5, 5)
-        self.mouse_drag_pos = None
+        self.start_drag_pos = None  # type: Pos
+        self.start_drag_offset = None  # type: Pos
 
         self.screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)  # type: pygame.SurfaceType
         self.font = self.new_font(self.font_size)  # type: pygame.font.FontType
@@ -90,21 +93,30 @@ class PygameDebugger:
                     # move 5 steps if ctrl pressed
                     self.current_tick += 1 + 4*(e.mod & pygame.KMOD_CTRL != 0)
                 elif e.key == pygame.K_LEFT:
-                    self.current_tick = max(0, self.current_tick - 1 - 4*(e.mod & pygame.KMOD_CTRL != 0))
+                    self.current_tick = max(-1, self.current_tick - 1 - 4*(e.mod & pygame.KMOD_CTRL != 0))
                 elif e.key == pygame.K_EQUALS:  # I would like the + but apparently it doesn't work
                     self.font = self.new_font(self.font_size + 1)
                 elif e.key == pygame.K_MINUS:
                     self.font = self.new_font(self.font_size - 1)
             elif e.type == pygame.MOUSEBUTTONDOWN:
-                self.mouse_drag_pos = pygame.mouse.get_pos()
+                self.start_drag_pos = Pos(pygame.mouse.get_pos())
+                self.start_drag_offset = self.offset
             elif e.type == pygame.MOUSEBUTTONUP:
-                self.mouse_drag_pos = None
+                self.start_drag_pos = None
+                self.start_drag_offset = None
 
-        if self.mouse_drag_pos is not None:
-            actual_pos = pygame.mouse.get_pos()
-            self.offset += Pos(*actual_pos) - self.mouse_drag_pos
-            self.mouse_drag_pos = actual_pos
+        if self.start_drag_pos is not None:
+            actual_pos = Pos(pygame.mouse.get_pos())
+            dx, dy = actual_pos - self.start_drag_pos
+            if abs(dx) < 20:
+                dx = 0
+            if abs(dy) < 20:
+                dy = 0
 
+            self.offset = self.start_drag_offset + (dx, dy)
+
+
+        # get new ticks if needed
         while self.current_tick >= len(self.ticks) and not self.env.io.finished:
             tick = self._get_new_tick()
             self.ticks.append(tick)
@@ -150,7 +162,7 @@ class PygameDebugger:
                 else:
                     surf = self._get_surface_for_char(c, color, BACKGROUND)
 
-                pos = self.offset[0] + self.char_size[0] * col, self.offset[1] + self.char_size[1] * row
+                pos = self.offset.x + self.char_size.x * col, self.offset.y + self.char_size.y * row
                 self.screen.blit(surf, pos)
 
     def new_font(self, size):
@@ -158,7 +170,7 @@ class PygameDebugger:
         self.font_size = size
         self._get_surface_for_char.cache_clear()
         font = pygame.font.Font(FONTNAME, size)
-        self.char_size = font.size(".")
+        self.char_size = Pos(font.size("."))
         return font
 
     def _get_new_tick(self):
