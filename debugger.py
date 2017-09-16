@@ -71,7 +71,7 @@ def main(filename):
         env = Env()
         callbacks_relay = CallbacksRelay(env)
 
-        with open(filename) as f:
+        with open(filename, encoding='utf-8') as f:
             prog = f.read()
         program_dir = os.path.dirname(os.path.abspath(filename))
 
