@@ -85,8 +85,17 @@ You need to tell where asciidot is installed (replace `../asciidots`  if it is n
 This will create two symbolic links to the interpreter `dots/` and the libs `libs/`.
 
     cd AsciidotsDebugger
-    set-asciidots-dir ../asciidots 
     
+Windows:
+
+    set-asciidots-dir.cmd ../asciidots 
+
+
+Linux/Mac:
+
+    chmod +x set-asciidots-dir.sh
+    ./set-asciidots-dir.sh ../asciidots
+
 Try it ! You can find more examples of Asciidots programs in the official repo along with the documentation of the language.
     
     python debugger.py samples/primes.dots
