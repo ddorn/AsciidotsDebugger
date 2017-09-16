@@ -49,19 +49,11 @@ And in the future
 - <kbd>Ctrl + Right</kbd> : 5th next step
 - <kbd>Ctrl + Left</kbd> : 5th previous step
 - <kbd>Ctrl + A</kbd> : Auto advance in the execution
-
-
 - <kbd>-</kbd> Decrease font size
 - <kbd>+</kbd> or <kbd>=</kbd> Increase font size
-
-
 - <kbd>Ctrl + B</kbd> Return to the beginning of the execution
 - <kbd>Ctrl + R</kbd> Reset the view (size and pos)
-
-
 - <kbd>Escape</kbd> To quit
-
-
 - Click and drag to move the code
 
 ![Drag your code](assets/move_around.gif)
@@ -88,7 +80,7 @@ This will create two symbolic links to the interpreter `dots/` and the libs `lib
     
 Windows:
 
-    set-asciidots-dir.cmd ../asciidots 
+    set-asciidots-dir.cmd ..\asciidots 
 
 
 Linux/Mac:
