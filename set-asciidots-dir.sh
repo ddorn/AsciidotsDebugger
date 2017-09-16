@@ -1,2 +1,5 @@
-ln -s dots $1/dots
-ln -s libs $1/libs
+#!/usr/bin/env bash
+
+ln -s $1/dots dots 
+ln -s $1/libs libs
+
