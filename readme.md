@@ -69,9 +69,9 @@ And in the future
 #### Installation and use
 
 
-The grapical interface is based on pygame, so you need to have it installed.
+The grapical interface is based on pygame, so you need to have it installed. The command line interface uses click, you must have it too.
 
-    pip install pygame
+    pip install pygame click
 
 You need to have asciidots installed too.
 
