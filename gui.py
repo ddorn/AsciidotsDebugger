@@ -192,11 +192,14 @@ class PygameDebugger:
                     self.font = self.new_font(self.font_size + 1)
                 elif e.key == pygame.K_MINUS:
                     self.font = self.new_font(self.font_size - 1)
-                elif e.key == pygame.K_r and e.mod & pygame.KMOD_CTRL:
-                    self.start_drag_pos = None
-                    self.start_drag_offset = None
-                    self.offset = Pos(5, 5)
-                    self.font = self.new_font(DEFAULT_FONT_SIZE)
+                elif e.mod & pygame.KMOD_CTRL:
+                    if e.key == pygame.K_r:
+                        self.start_drag_pos = None
+                        self.start_drag_offset = None
+                        self.offset = Pos(5, 5)
+                        self.font = self.new_font(DEFAULT_FONT_SIZE)
+                    elif e.key == pygame.K_b:
+                        self.current_tick = -1
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 self.start_drag_pos = mouse
                 self.start_drag_offset = self.offset
