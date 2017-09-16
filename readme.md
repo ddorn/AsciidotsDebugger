@@ -58,24 +58,30 @@ And in the future
 
 #### Installation and use
 
+
 The grapical interface is based on pygame, so you need to have it installed.
 
     pip install pygame
 
-Then in the folder you want:
+You need to have asciidots installed too.
+
+    git clone https://github.com/aaronduino/asciidots
+
+Then install AsciidotsDebugger:
     
     git clone https://github.com/ddorn/AsciidotsDebugger
+
+You need to tell where asciidot is installed (replace `../asciidots`  if it is not your location).
+This will create two symbolic links to the interpreter `dots/` and the libs `libs/`.
+
     cd AsciidotsDebugger
-    python debugger.py samples/fibonnaci.dots
+    set-asciidots-dir ../asciidots 
+    
+Try it ! You can find more examples of Asciidots programs in the official repo along with the documentation of the language.
+    
+    python debugger.py samples/primes.dots
 
 Enjoy it !
-
-### Remarks
-
-This repo is a clone of my own fork of asciidots, this means that there can be a delay (and there will be) 
-between an update of the official version of asciidots and the one in this repo.
-
-I'm very open to suggestions, issues and PRs ;)
 
 ---
 
