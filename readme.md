@@ -49,6 +49,7 @@ And in the future
 - <kbd>-</kbd> Decrease font size
 - <kbd>+</kbd> or <kbd>=</kbd> Increase font size
 - <kbd>Ctrl + R</kbd> Reset the view (size and pos)
+- <kbd>Escape</kbd> To quit
 - Click and drag to move the code
 
 ![Drag your code](assets/move_around.gif)
