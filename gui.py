@@ -97,14 +97,16 @@ class Dot:
             self.tooltip = self.get_tooltip()  # type: pygame.SurfaceType
 
         rect = self.tooltip.get_rect()  # type: pygame.rect.RectType
-        rect.topleft = pos + Pos(10, 10)
+        rect.topleft = pos
 
         points = rect.topleft, rect.topright, rect.bottomright, rect.bottomleft
         pygame.gfxdraw.filled_polygon(screen, points, COLORS[BACKGROUND] + (180,))
         screen.blit(self.tooltip, rect)
 
+        return rect
+
     def get_tooltip(self):
-        """"""
+        """Get the surface with dot's info."""
         text = "#{} @{} ~{}".format(self.value, self.id, self.state)
         hashsurf = self.render_text('#')
         value = self.render_text(str(self.value))
@@ -262,12 +264,13 @@ class PygameDebugger:
             current_msg.render(self.screen)
 
         # Tooltip
+        tooltip_pos = mouse + Pos(10, 10)
         for dot in self.current_dots:
             # if there is more than one dot at this place, we want to show only one
             # the first dot that has this pos
             if pygame.Rect(self.map_to_screen_pos(dot.pos), self.char_size).collidepoint(*mouse):
-                dot.show(self.screen, mouse)
-                break
+                rect = dot.show(self.screen, tooltip_pos)
+                tooltip_pos += (0, rect.height)
 
     def new_font(self, size):
         size = min(80, max(2, size))  # clamp
