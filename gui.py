@@ -12,7 +12,7 @@ try:
     import ctypes
 
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
-except:
+except AttributeError:
     pass
 
 pygame.init()
@@ -77,6 +77,7 @@ class Message:
         return self.FONT.render(self.text, 1, COLORS[MSG], COLORS[MSG_BG]).convert()
 
 
+# noinspection PyArgumentList
 class Dot:
     FONT = pygame.font.Font(FONTNAME, DEFAULT_FONT_SIZE)
 
@@ -90,34 +91,34 @@ class Dot:
         self.id = dot.id
         self.value = dot.value
 
-        self.tooltip = None  # type: pygame.SurfaceType
-
     def show(self, screen, pos):
-        if self.tooltip is None:
-            self.tooltip = self.get_tooltip()  # type: pygame.SurfaceType
+        # this is not an abomination because it is often chached
+        tooltip = self.get_tooltip(self.value, self.id, self.state)  # type: pygame.SurfaceType
 
-        rect = self.tooltip.get_rect()  # type: pygame.rect.RectType
+        rect = tooltip.get_rect()  # type: pygame.rect.RectType
         rect.topleft = pos
 
         points = rect.topleft, rect.topright, rect.bottomright, rect.bottomleft
         pygame.gfxdraw.filled_polygon(screen, points, COLORS[BACKGROUND] + (180,))
-        screen.blit(self.tooltip, rect)
+        screen.blit(tooltip, rect)
 
         return rect
 
-    def get_tooltip(self):
+    @classmethod
+    @lru_cache(32)
+    def get_tooltip(cls, value, id_, state):
         """Get the surface with dot's info."""
-        text = "#{} @{} ~{}".format(self.value, self.id, self.state)
-        hashsurf = self.render_text('#')
-        value = self.render_text(str(self.value))
-        sep = self.render_text(' ')
-        atsurf = self.render_text('@')
-        idsurf = self.render_text(str(self.id))
-        state_sep = self.render_text('~')
-        end = self.render_text(self.state)
+        text = "#{} @{} ~{}".format(value, id_, state)
+        hashsurf = cls.render_text('#')
+        value = cls.render_text(str(value))
+        sep = cls.render_text(' ')
+        atsurf = cls.render_text('@')
+        idsurf = cls.render_text(str(id_))
+        state_sep = cls.render_text('~')
+        end = cls.render_text(state)
 
         pos = 0
-        surf = pygame.Surface(self.FONT.size(text))
+        surf = pygame.Surface(cls.FONT.size(text))
         surf.set_colorkey((0, 0, 0))
         for s in (hashsurf, value, sep, atsurf, idsurf, sep, state_sep, end):
             surf.blit(s, (pos, 0))
@@ -126,7 +127,7 @@ class Dot:
         return surf
 
     @classmethod
-    @lru_cache(maxsize=None)
+    @lru_cache(128)
     def render_text(cls, text):
         if text == '#':
             return cls.FONT.render(text, 1, COLORS[MODES])
