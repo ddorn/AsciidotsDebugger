@@ -150,6 +150,7 @@ class PygameDebugger:
         self.env = env
 
         self.current_tick = -1
+        self.auto_tick = False
 
         self.font_size = DEFAULT_FONT_SIZE
         self.char_size = None  # type: Pos
@@ -178,6 +179,10 @@ class PygameDebugger:
     def update(self):
         mouse = Pos(pygame.mouse.get_pos())
 
+        if self.auto_tick:
+            self.current_tick += 1
+            self.sync_ticks()
+
         for e in pygame.event.get():
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_ESCAPE:
@@ -200,6 +205,8 @@ class PygameDebugger:
                         self.font = self.new_font(DEFAULT_FONT_SIZE)
                     elif e.key == pygame.K_b:
                         self.current_tick = -1
+                    elif e.key == pygame.K_a:
+                        self.auto_tick = not self.auto_tick
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 self.start_drag_pos = mouse
                 self.start_drag_offset = self.offset
@@ -208,9 +215,7 @@ class PygameDebugger:
                 self.start_drag_offset = None
 
             # get new ticks if needed
-            while self.current_tick >= len(self.ticks) and not self.env.io.finished:
-                tick = self._get_new_tick()
-                self.ticks.append([Dot(dot) for dot in tick])
+            self.sync_ticks()
 
         # drag the code if needed
         if self.start_drag_pos is not None:
@@ -227,6 +232,12 @@ class PygameDebugger:
         if not self.io.outputs.empty():
             x, _ = Pos(self.screen.get_size())
             self.prints[self.current_tick] = Message(self.io.outputs.get(), (x, 0), 'topright')
+
+    def sync_ticks(self):
+        """Get new ticks untill current_tick."""
+        while self.current_tick >= len(self.ticks) and not self.env.io.finished:
+            tick = self._get_new_tick()
+            self.ticks.append([Dot(dot) for dot in tick])
 
     def map_to_screen_pos(self, pos):
         """Convert the position of char/dot in the map to its coordinates in the screen."""

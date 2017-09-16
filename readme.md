@@ -48,6 +48,7 @@ And in the future
 - <kbd>Left</kbd> : Previous step
 - <kbd>Ctrl + Right</kbd> : 5th next step
 - <kbd>Ctrl + Left</kbd> : 5th previous step
+- <kbd>Ctrl + A</kbd> : Auto advance in the execution
 
 
 - <kbd>-</kbd> Decrease font size
