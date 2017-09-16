@@ -61,22 +61,18 @@ And in the future
 #### Installation and use
 
 
-The grapical interface is based on pygame, so you need to have it installed. The command line interface uses click, you must have it too.
+The grapical interface is based on pygame, so you need to have it installed. 
+The command line interface uses click, you must have it too.
+Of course, you need and asciidots interpreter.
 
     pip install pygame click
-
-You need to have asciidots installed too.
-
-    git clone https://github.com/aaronduino/asciidots
-
-Then install AsciidotsDebugger:
-    
+    git clone https://github.com/aaronduino/asciidots   
     git clone https://github.com/ddorn/AsciidotsDebugger
+    cd AsciidotsDebugger
 
 You need to tell where asciidot is installed (replace `../asciidots`  if it is not your location).
 This will create two symbolic links to the interpreter `dots/` and the libs `libs/`.
 
-    cd AsciidotsDebugger
     
 Windows:
 
