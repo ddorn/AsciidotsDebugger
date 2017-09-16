@@ -99,3 +99,7 @@ ddorn
 
 # MacOS
 */.DS_Store
+
+# symbolic links
+dots
+libs
