@@ -1,3 +1,5 @@
+![Pi prime generation](assets/pi-primes.PNG)
+
 # Debugger for Asciidots
 
 
