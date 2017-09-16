@@ -8,7 +8,7 @@ The beautiful [Asciidot language](https://github.com/aaronduino/asciidots)
 develloped by Aaron Janse is inspired by ascii-art and electronic circuits.
 
 You may want to try it online [here](https://asciidots.herokuapp.com/)
-or buy cloning the [repo](https://github.com/aaronduino/asciidots).
+or by cloning the [repo](https://github.com/aaronduino/asciidots).
 
     git clone https://github.com/aaronduino/asciidots
     cd asciidots
@@ -92,6 +92,8 @@ Try it ! You can find more examples of Asciidots programs in the official repo a
     python debugger.py samples/primes.dots
 
 Enjoy it !
+
+![Love](assets/love.png)
 
 ---
 
