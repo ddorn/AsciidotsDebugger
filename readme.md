@@ -87,9 +87,12 @@ This will create two symbolic links to the interpreter `dots/` and the libs `lib
     cd AsciidotsDebugger
     
 Windows:
+
     set-asciidots-dir.cmd ../asciidots 
 
+
 Linux/Mac:
+
     chmod +x set-asciidots-dir.sh
     ./set-asciidots-dir.sh ../asciidots
 
