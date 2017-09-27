@@ -335,15 +335,15 @@ class PygameDebugger:
         # show every char of the map + dots via the background
         for row, line in enumerate(self.map):
             for col, char in enumerate(line):
-                c = char
                 pos = Pos(col, row)
-                screen_pos = self.map_to_screen_pos(pos)
+                pos_on_screen = self.map_to_screen_pos(pos)
+                rect = pygame.Rect(pos_on_screen, MAINFONT.char_size)
 
                 # we don't want to render the char that are outside the screen
-                if not pygame.Rect(screen_pos, MAINFONT.char_size).colliderect(screen_rect):
+                if not rect.colliderect(screen_rect):
                     continue
 
-                char.render(self.screen, screen_pos, pos in dot_pos)
+                char.render(self.screen, pos_on_screen, pos in dot_pos)
 
                 if self.more_debug:
                     pass
