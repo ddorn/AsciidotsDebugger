@@ -7,12 +7,14 @@ import pygame.gfxdraw
 
 from dots.vector import Pos
 
-# fixing f****** dpi awareness of my computer
+from visual.font import Font
+
 try:
+    # fixing f****** dpi awareness of my computer
     import ctypes
 
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
-except AttributeError:
+except AttributeError:  # not windows
     pass
 
 pygame.init()
@@ -63,6 +65,10 @@ class Tooltip:
     def add(self, object):
         """Add an object that as a get_tooltip method that returns a surface with the tip"""
         self.tips.append(object.get_tooltip())
+
+    def insert(self, object, index):
+        """Insert a tip at the given index."""
+        self.tips.insert(object.get_tooltip(), index)
 
     def render(self, screen):
         """Show all the tips to the screen."""
@@ -225,16 +231,16 @@ class PygameDebugger:
                 elif e.key == pygame.K_MINUS:
                     self.font = self.new_font(self.font_size - 1)
                 elif e.mod & pygame.KMOD_CTRL:
-                    if e.key == pygame.K_r:
+                    if e.key == pygame.K_r:  # reset position and size
                         self.start_drag_pos = None
                         self.start_drag_offset = None
                         self.offset = Pos(5, 5)
                         self.font = self.new_font(DEFAULT_FONT_SIZE)
-                    elif e.key == pygame.K_b:
+                    elif e.key == pygame.K_b:  # go back to the beginning
                         self.current_tick = -1
-                    elif e.key == pygame.K_a:
+                    elif e.key == pygame.K_a:  # toggle autotick
                         self.auto_tick = not self.auto_tick
-                    elif e.key == pygame.K_m:
+                    elif e.key == pygame.K_m:  # toggle more_debug
                         self.more_debug = not self.more_debug
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 self.start_drag_pos = mouse
@@ -332,6 +338,7 @@ class PygameDebugger:
             return self.prints[sorted(ticks)[-1]]
 
     def char_to_color(self, char, pos):
+        """Get the colorcode to render a given char."""
         if char.isOper():
             return OPERATOR
         if char in '[{' and self.env.world.does_loc_exist(pos + Pos(1, 0)) and self.env.world.get_char_at(
