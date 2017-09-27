@@ -72,13 +72,13 @@ class Tooltip:
         self.tips = []  # type: List[pygame.SurfaceType]
         self.pos = pos  # type: Pos
 
-    def add(self, object):
+    def add(self, obj):
         """Add an object that as a get_tooltip method that returns a surface with the tip"""
-        self.tips.append(object.get_tooltip())
+        self.tips.append(obj.get_tooltip())
 
-    def insert(self, object, index):
+    def insert(self, obj, index):
         """Insert a tip at the given index."""
-        self.tips.insert(object.get_tooltip(), index)
+        self.tips.insert(obj.get_tooltip(), index)
 
     def render(self, screen):
         """Show all the tips to the screen."""
@@ -90,7 +90,6 @@ class Tooltip:
 
         # we just blit each surface given via add() with a darker background
         for tip in self.tips:
-
             rect = tip.get_rect()  # type: pygame.rect.RectType
             rect.topleft = pos
             rect.width = width
@@ -143,6 +142,7 @@ class VisualChar:
         else:
             surf = MAINFONT.render_char(self.char, COLORS[self.color], COLORS[BACKGROUND])
         screen.blit(surf, pos)
+
 
 # noinspection PyArgumentList
 class Dot:
@@ -237,13 +237,13 @@ class PygameDebugger:
             return pygame.display.set_mode((0, 0), pygame.NOFRAME)
 
     def get_map(self, env):
-        map = copy.deepcopy(env.world.map)
-        for row, line in enumerate(map):
+        map_ = copy.deepcopy(env.world.map)
+        for row, line in enumerate(map_):
             for col, char in enumerate(line):
                 color = self.char_to_color(char, Pos(col, row))
-                map[row][col] = VisualChar(char, color)
+                map_[row][col] = VisualChar(char, color)
 
-        return map
+        return map_
 
     def run(self):
         """Start the debugger. stop it with io.on_finish()"""
@@ -268,7 +268,7 @@ class PygameDebugger:
                 elif e.key == pygame.K_RIGHT:
                     # move 5 steps if ctrl pressed
                     self.current_tick += 1 + 4 * \
-                        (e.mod & pygame.KMOD_CTRL != 0)
+                                             (e.mod & pygame.KMOD_CTRL != 0)
                 elif e.key == pygame.K_LEFT:
                     self.current_tick = max(-1, self.current_tick -
                                             1 - 4 * (e.mod & pygame.KMOD_CTRL != 0))
@@ -391,10 +391,10 @@ class PygameDebugger:
         if char.isOper():
             return OPERATOR
         if char in '[{' and self.env.world.does_loc_exist(pos + Pos(1, 0)) and self.env.world.get_char_at(
-                pos + Pos(1, 0)).isOper():
+                        pos + Pos(1, 0)).isOper():
             return BRACKETS
         if char in '}]' and self.env.world.does_loc_exist(pos - Pos(1, 0)) and self.env.world.get_char_at(
-                pos - Pos(1, 0)).isOper():
+                        pos - Pos(1, 0)).isOper():
             return BRACKETS
         if char in '~*':
             return CONTROL_FLOW
