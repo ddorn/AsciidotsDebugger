@@ -56,11 +56,12 @@ COLORS = {
 
 
 class Message:
+    """Display a string in to the screen."""
     FONT = pygame.font.Font(FONTNAME, 2 * DEFAULT_FONT_SIZE)
 
     def __init__(self, text, pos, anchor='topleft'):
         self.text = str(text).replace('\n', '')
-        self.surf = self.get_surf()  # type: pygame.SurfaceType
+        self.surf = self.get_surf(text)  # type: pygame.SurfaceType
         self.pos = tuple(pos)
         self.anchor = anchor
 
@@ -71,14 +72,17 @@ class Message:
 
     def new_font(self, size):
         self.FONT = pygame.font.Font(FONTNAME, size)
-        self.surf = self.get_surf()
+        self.surf = self.get_surf(self.text)
 
-    def get_surf(self):
-        return self.FONT.render(self.text, 1, COLORS[MSG], COLORS[MSG_BG]).convert()
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def get_surf(text):
+        return Message.FONT.render(text, 1, COLORS[MSG], COLORS[MSG_BG]).convert()
 
 
 # noinspection PyArgumentList
 class Dot:
+    """Same as a basic Asciidot dot but with only the nessecary atributes and methods to show it."""
     FONT = pygame.font.Font(FONTNAME, DEFAULT_FONT_SIZE)
 
     def __init__(self, dot):
@@ -92,6 +96,7 @@ class Dot:
         self.value = dot.value
 
     def show(self, screen, pos):
+        """Display information about the dot value, id and state to the screen."""
         # this is not an abomination because it is often chached
         tooltip = self.get_tooltip(self.value, self.id, self.state)  # type: pygame.SurfaceType
 
