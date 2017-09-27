@@ -44,7 +44,7 @@ ESCAPE_SEQUANCES = 10
 MODES = 11
 MSG = 12
 MSG_BG = 13
-MOREDEBUG_MSG = 14
+MOREDEBUG = 14
 
 COLORS = {
     REGULAR: (248, 248, 242),
@@ -61,7 +61,7 @@ COLORS = {
     MODES: (166, 226, 46),
     MSG: (248, 248, 242),
     MSG_BG: (62, 61, 50),
-    MOREDEBUG_MSG: (253, 151, 31),
+    MOREDEBUG: (253, 151, 31),
 }
 
 
@@ -154,14 +154,11 @@ class VisualChar:
         self.color = color
 
     def get_tooltip(self):
-        return MAINFONT.render_text(type(self.char).__name__, COLORS[MOREDEBUG_MSG])
+        return MAINFONT.render_text(type(self.char).__name__, COLORS[MOREDEBUG])
 
-    def render(self, screen, pos, dot_here=False):
+    def render(self, screen, pos, bg_code):
         # background depends if there is a dot or not
-        if dot_here:
-            surf = MAINFONT.render_char(self.char, COLORS[self.color], COLORS[DOT])
-        else:
-            surf = MAINFONT.render_char(self.char, COLORS[self.color], COLORS[BACKGROUND])
+        surf = MAINFONT.render_char(self.char, COLORS[self.color], COLORS[bg_code])
         screen.blit(surf, pos)
 
 
@@ -372,6 +369,8 @@ class PygameDebugger:
         tooltip = Tooltip(mouse + Pos(10, 10))
         screen_rect = self.screen.get_rect()
 
+        companion = None  # type: Pos
+
         # show every char of the map + dots via the background
         for row, line in enumerate(self.map):
             for col, char in enumerate(line):
@@ -383,24 +382,35 @@ class PygameDebugger:
                 if not rect.colliderect(screen_rect):
                     continue
 
-                char.render(self.screen, pos_on_screen, pos in dot_pos)
+                char.render(self.screen, pos_on_screen, [BACKGROUND, DOT][pos in dot_pos])
 
                 if self.more_debug:
                     if rect.collidepoint(*mouse):
+                        # show the class of chars
                         tooltip.add(char)
                         tooltip.add(Tooltip.separation)
+
+                        # we will draw (later) the connected wrap with an othe background
+                        if char.char.isWarp() and not char.char.isSingletonLibReturnWarp():
+                            companion = char.char.get_dest_loc()
+
+        # redraw the companion char of the current wrap with another bacground
+        if companion:
+            char = self.map[companion.row][companion.col]
+            char.render(self.screen, self.map_to_screen_pos(companion), MOREDEBUG)
 
         # Show output
         current_msg = self.get_current_message()
         if current_msg:
             current_msg.render(self.screen)
 
-        # Tooltips
+        # Tooltips for dot info
         for dot in self.current_dots:
             # if there is more than one dot at this place, we want to show only one
             # the first dot that has this pos
             if pygame.Rect(self.map_to_screen_pos(dot.pos), MAINFONT.char_size).collidepoint(*mouse):
                 tooltip.add(dot)
+        # show all the nice tips in last, over everything
         tooltip.render(self.screen)
 
     def get_current_message(self):

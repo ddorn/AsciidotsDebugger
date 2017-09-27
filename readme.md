@@ -36,6 +36,7 @@ With this, you will be able to:
 
 The *more debug* mode lets you:
 - Know the class of the chars
+- See where wraps lead
 
 ###### And in the future
 - See the values of all dots at the same place
@@ -44,8 +45,6 @@ The *more debug* mode lets you:
 - Give inputs to your code
 - Make gifs of your code 
 
-In the more debug mode:
-- see where wraps lead
 
 ![Play with the time](assets/play_with_time.gif)
 
