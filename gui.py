@@ -29,6 +29,7 @@ DEFAULT_FONT_SIZE = 24
 MAINFONT = Font(FONTNAME, DEFAULT_FONT_SIZE)
 SMALLFONT = Font(FONTNAME, DEFAULT_FONT_SIZE * 0.75)
 BIGFONT = Font(FONTNAME, DEFAULT_FONT_SIZE * 2)
+
 REGULAR = 0
 DOT = 1
 BACKGROUND = 2
@@ -158,7 +159,7 @@ class Dot:
         self.value = dot.value
 
     def get_tooltip(self):
-        """GEt a surface with Display information about the dot value, id and state to the screen."""
+        """Get a surface with Display information about the dot value, id and state to the screen."""
         return self._get_tooltip(self.value, self.id, self.state)
 
     @classmethod
@@ -200,7 +201,7 @@ class Dot:
 class PygameDebugger:
     FPS = 60
 
-    def __init__(self, env):
+    def __init__(self, env, retina):
         """
         Graphical degguer updating from callbacks_relay
 
@@ -209,6 +210,8 @@ class PygameDebugger:
 
         self.env = env
 
+        self.retina = retina
+
         self.current_tick = -1
         self.auto_tick = False
 
@@ -216,7 +219,14 @@ class PygameDebugger:
         self.start_drag_pos = None  # type: Pos
         self.start_drag_offset = None  # type: Pos
 
-        self.screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)  # type: pygame.SurfaceType
+        self.font = self.new_font(self.font_size)  # type: pygame.font.FontType
+        if retina:
+            w, h = pygame.display.list_modes()[0]
+            self.screen = pygame.display.set_mode(
+                (w, h), pygame.RESIZABLE)  # type: pygame.SurfaceType
+        else:
+            self.screen = pygame.display.set_mode(
+                (0, 0), pygame.NOFRAME)  # type: pygame.SurfaceType
         self.clock = pygame.time.Clock()
 
         self.tooltip = None  # type: Dot
@@ -297,10 +307,15 @@ class PygameDebugger:
         if self.start_drag_pos is not None:
             actual_pos = mouse
             dx, dy = actual_pos - self.start_drag_pos
-            if abs(dx) < 20:
-                dx = 0
-            if abs(dy) < 20:
-                dy = 0
+            if not self.retina:
+                if abs(dx) < 20:
+                    dx = 0
+                if abs(dy) < 20:
+                    dy = 0
+
+            if self.retina:
+                dx *= 2
+                dy *= 2
 
             self.offset = self.start_drag_offset + (dx, dy)
 
