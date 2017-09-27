@@ -63,6 +63,8 @@ COLORS = {
 
 
 class Tooltip:
+    """Display a list of infos about objects."""
+
     def __init__(self, pos):
         self.tips = []  # type: List[pygame.SurfaceType]
         self.pos = pos  # type: Pos
@@ -77,13 +79,18 @@ class Tooltip:
 
     def render(self, screen):
         """Show all the tips to the screen."""
+        if not self.tips:
+            return
+
         pos = self.pos
+        width = max([s.get_width() for s in self.tips])
 
         # we just blit each surface given via add() with a darker background
         for tip in self.tips:
 
             rect = tip.get_rect()  # type: pygame.rect.RectType
             rect.topleft = pos
+            rect.width = width
 
             # we draw a dark background to better see the tip
             points = rect.topleft, rect.topright, rect.bottomright, rect.bottomleft
@@ -92,9 +99,10 @@ class Tooltip:
             screen.blit(tip, rect)
 
             # we shift the bliting pos by the surfs height
-            pos += 0, tip.get_rect().height
+            pos += 0, tip.get_rect().height + 1
 
 
+# this will be removed one day
 class Message:
     """Display a string in to the screen."""
 
