@@ -1,3 +1,4 @@
+import copy
 import os
 from functools import lru_cache
 from typing import Dict, List
@@ -17,13 +18,17 @@ try:
 except AttributeError:  # not windows
     pass
 
+Map = List[List["VisualChar"]]
+
 pygame.init()
 pygame.key.set_repeat(200, 10)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 FONTNAME = 'assets/monaco.ttf'
 DEFAULT_FONT_SIZE = 24
-
+MAINFONT = Font(FONTNAME, DEFAULT_FONT_SIZE)
+SMALLFONT = Font(FONTNAME, DEFAULT_FONT_SIZE * 0.75)
+BIGFONT = Font(FONTNAME, DEFAULT_FONT_SIZE * 2)
 REGULAR = 0
 DOT = 1
 BACKGROUND = 2
@@ -115,10 +120,28 @@ class Message:
         return Message.FONT.render(text, 1, COLORS[MSG], COLORS[MSG_BG]).convert()
 
 
+class VisualChar:
+    def __init__(self, char, color):
+        self.char = char
+        self.color = color
+
+    def has_tip(self):
+        raise NotImplementedError
+
+    def get_tooltip(self):
+        raise NotImplementedError
+
+    def render(self, screen, pos, dot_here=False):
+        # background depends if there is a dot or not
+        if dot_here:
+            surf = MAINFONT.render_char(self.char, COLORS[self.color], COLORS[DOT])
+        else:
+            surf = MAINFONT.render_char(self.char, COLORS[self.color], COLORS[BACKGROUND])
+        screen.blit(surf, pos)
+
 # noinspection PyArgumentList
 class Dot:
     """Same as a basic Asciidot dot but with only the nessecary atributes and methods to show it."""
-    FONT = pygame.font.Font(FONTNAME, DEFAULT_FONT_SIZE)
 
     def __init__(self, dot):
         """
@@ -135,6 +158,7 @@ class Dot:
         return self._get_tooltip(self.value, self.id, self.state)
 
     @classmethod
+    @MAINFONT.clear_when_size_change
     @lru_cache(32)
     def _get_tooltip(cls, value, id_, state):
         """Get the surface with dot's info."""
@@ -148,7 +172,7 @@ class Dot:
         end = cls.render_text(state)
 
         pos = 0
-        surf = pygame.Surface(cls.FONT.size(text))
+        surf = pygame.Surface(MAINFONT.size(text))
         surf.set_colorkey((0, 0, 0))
         for s in (hashsurf, value, sep, atsurf, idsurf, sep, state_sep, end):
             surf.blit(s, (pos, 0))
@@ -157,15 +181,16 @@ class Dot:
         return surf
 
     @classmethod
+    @MAINFONT.clear_when_size_change
     @lru_cache(128)
     def render_text(cls, text):
         if text == '#':
-            return cls.FONT.render(text, 1, COLORS[MODES])
+            return MAINFONT.render_char(text, COLORS[MODES])
         if text == '@':
-            return cls.FONT.render(text, 1, COLORS[OPERATOR])
+            return MAINFONT.render_char(text, COLORS[OPERATOR])
         if text == '~':
-            return cls.FONT.render(text, 1, COLORS[CONTROL_FLOW])
-        return cls.FONT.render(text, 1, COLORS[MSG])
+            return MAINFONT.render_char(text, COLORS[CONTROL_FLOW])
+        return MAINFONT.render_text(text, COLORS[MSG])
 
 
 class PygameDebugger:
@@ -183,14 +208,10 @@ class PygameDebugger:
         self.current_tick = -1
         self.auto_tick = False
 
-        self.font_size = DEFAULT_FONT_SIZE
-        self.char_size = None  # type: Pos
-
         self.offset = Pos(5, 5)
         self.start_drag_pos = None  # type: Pos
         self.start_drag_offset = None  # type: Pos
 
-        self.font = self.new_font(self.font_size)  # type: pygame.font.FontType
         self.screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)  # type: pygame.SurfaceType
         self.clock = pygame.time.Clock()
 
@@ -198,8 +219,18 @@ class PygameDebugger:
 
         self.ticks = []  # type: List[List[Dot]]
         self.prints = {}  # type: Dict[int, Message]
+        self.map = self.get_map(self.env)  # type: Map
 
         self.more_debug = False
+
+    def get_map(self, env):
+        map = copy.deepcopy(env.world.map)
+        for row, line in enumerate(map):
+            for col, char in enumerate(line):
+                color = self.char_to_color(char, Pos(col, row))
+                map[row][col] = VisualChar(char, color)
+
+        return map
 
     def run(self):
         """Start the debugger. stop it with io.on_finish()"""
@@ -227,15 +258,15 @@ class PygameDebugger:
                 elif e.key == pygame.K_LEFT:
                     self.current_tick = max(-1, self.current_tick - 1 - 4 * (e.mod & pygame.KMOD_CTRL != 0))
                 elif e.key == pygame.K_EQUALS:  # I would like the + but apparently it doesn't work
-                    self.font = self.new_font(self.font_size + 1)
+                    MAINFONT.change_size(1)
                 elif e.key == pygame.K_MINUS:
-                    self.font = self.new_font(self.font_size - 1)
+                    MAINFONT.change_size(-1)
                 elif e.mod & pygame.KMOD_CTRL:
                     if e.key == pygame.K_r:  # reset position and size
                         self.start_drag_pos = None
                         self.start_drag_offset = None
                         self.offset = Pos(5, 5)
-                        self.font = self.new_font(DEFAULT_FONT_SIZE)
+                        MAINFONT.set_size(DEFAULT_FONT_SIZE)
                     elif e.key == pygame.K_b:  # go back to the beginning
                         self.current_tick = -1
                     elif e.key == pygame.K_a:  # toggle autotick
@@ -276,7 +307,7 @@ class PygameDebugger:
 
     def map_to_screen_pos(self, pos):
         """Convert the position of char/dot in the map to its coordinates in the screen."""
-        return self.offset.x + self.char_size.x * pos.col, self.offset.y + self.char_size.y * pos.row
+        return self.offset.x + MAINFONT.char_size.x * pos.col, self.offset.y + MAINFONT.char_size.y * pos.row
 
     def render(self):
         self.screen.fill(COLORS[BACKGROUND])
@@ -287,26 +318,25 @@ class PygameDebugger:
             dot_pos = {dot.pos for dot in self.ticks[self.current_tick]}
 
         mouse = pygame.mouse.get_pos()
+        tooltip = Tooltip(mouse + Pos(10, 10))
+        screen_rect = self.screen.get_rect()
 
         # show every char of the map + dots via the background
-        for row, line in enumerate(self.env.world.map):
+        for row, line in enumerate(self.map):
             for col, char in enumerate(line):
                 c = char
                 pos = Pos(col, row)
                 screen_pos = self.map_to_screen_pos(pos)
 
                 # we don't want to render the char that are outside the screen
-                if not pygame.Rect(screen_pos, self.char_size).colliderect(self.screen.get_rect()):
+                if not pygame.Rect(screen_pos, MAINFONT.char_size).colliderect(screen_rect):
                     continue
 
-                color = self.char_to_color(char, pos)
+                char.render(self.screen, screen_pos, pos in dot_pos)
 
-                # background depends if there is a dot or not
-                if pos in dot_pos:
-                    surf = self._get_surface_for_char(c, color, DOT)
-                else:
-                    surf = self._get_surface_for_char(c, color, BACKGROUND)
-                self.screen.blit(surf, screen_pos)
+                if self.more_debug:
+                    pass
+
 
         # Show output
         current_msg = self.get_current_message()
@@ -314,23 +344,14 @@ class PygameDebugger:
             current_msg.render(self.screen)
 
         # Tooltips
-        tooltip = Tooltip(mouse + Pos(10, 10))
         if self.more_debug:
             pass
         for dot in self.current_dots:
             # if there is more than one dot at this place, we want to show only one
             # the first dot that has this pos
-            if pygame.Rect(self.map_to_screen_pos(dot.pos), self.char_size).collidepoint(*mouse):
+            if pygame.Rect(self.map_to_screen_pos(dot.pos), MAINFONT.char_size).collidepoint(*mouse):
                 tooltip.add(dot)
         tooltip.render(self.screen)
-
-    def new_font(self, size):
-        size = min(80, max(2, size))  # clamp
-        self.font_size = size
-        self._get_surface_for_char.cache_clear()
-        font = pygame.font.Font(FONTNAME, size)
-        self.char_size = Pos(font.size("."))
-        return font
 
     def get_current_message(self):
         ticks = list(filter(lambda x: x <= self.current_tick, self.prints.keys()))
@@ -372,10 +393,6 @@ class PygameDebugger:
     def _get_new_tick(self):
         """Get a new tick from the interpreter, it can be none if there is no new tick yet"""
         return self.env.io.get_tick(wait=True)
-
-    @lru_cache(maxsize=None)
-    def _get_surface_for_char(self, char, color, background):
-        return self.font.render(char, True, COLORS[color], COLORS[background]).convert()
 
     @property
     def io(self):
