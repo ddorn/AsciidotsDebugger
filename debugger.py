@@ -66,7 +66,9 @@ class CallbacksRelay(IOCallbacksStorage):
 
 @click.command()
 @click.argument('filename')
-def main(filename):
+@click.argument('filename')
+@click.option('--retina', default=False)
+def main(filename, retina):
     try:
         env = Env()
         callbacks_relay = CallbacksRelay(env)
@@ -78,7 +80,7 @@ def main(filename):
         interpreter = AsciiDotsInterpreter(env, prog, program_dir, True)
         interpreter.run(run_in_separate_thread=True)
 
-        debugger = gui.PygameDebugger(env)
+        debugger = gui.PygameDebugger(env, retina)
         debugger.run()
     except Exception as e:
         callbacks_relay.on_finish()

@@ -141,7 +141,7 @@ class Dot:
 class PygameDebugger:
     FPS = 60
 
-    def __init__(self, env):
+    def __init__(self, env, retina):
         """
         Graphical degguer updating from callbacks_relay
 
@@ -149,6 +149,8 @@ class PygameDebugger:
         """
 
         self.env = env
+
+        self.retina = retina
 
         self.current_tick = -1
         self.auto_tick = False
@@ -161,7 +163,13 @@ class PygameDebugger:
         self.start_drag_offset = None  # type: Pos
 
         self.font = self.new_font(self.font_size)  # type: pygame.font.FontType
-        self.screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)  # type: pygame.SurfaceType
+        if retina:
+            w, h = pygame.display.list_modes()[0]
+            self.screen = pygame.display.set_mode(
+                (w, h), pygame.RESIZABLE)  # type: pygame.SurfaceType
+        else:
+            self.screen = pygame.display.set_mode(
+                (0, 0), pygame.NOFRAME)  # type: pygame.SurfaceType
         self.clock = pygame.time.Clock()
 
         self.tooltip = None  # type: Dot
@@ -191,9 +199,11 @@ class PygameDebugger:
                     return
                 elif e.key == pygame.K_RIGHT:
                     # move 5 steps if ctrl pressed
-                    self.current_tick += 1 + 4 * (e.mod & pygame.KMOD_CTRL != 0)
+                    self.current_tick += 1 + 4 * \
+                        (e.mod & pygame.KMOD_CTRL != 0)
                 elif e.key == pygame.K_LEFT:
-                    self.current_tick = max(-1, self.current_tick - 1 - 4 * (e.mod & pygame.KMOD_CTRL != 0))
+                    self.current_tick = max(-1, self.current_tick -
+                                            1 - 4 * (e.mod & pygame.KMOD_CTRL != 0))
                 elif e.key == pygame.K_EQUALS:  # I would like the + but apparently it doesn't work
                     self.font = self.new_font(self.font_size + 1)
                 elif e.key == pygame.K_MINUS:
@@ -222,17 +232,23 @@ class PygameDebugger:
         if self.start_drag_pos is not None:
             actual_pos = mouse
             dx, dy = actual_pos - self.start_drag_pos
-            if abs(dx) < 20:
-                dx = 0
-            if abs(dy) < 20:
-                dy = 0
+            if not self.retina:
+                if abs(dx) < 20:
+                    dx = 0
+                if abs(dy) < 20:
+                    dy = 0
+
+            if self.retina:
+                dx *= 2
+                dy *= 2
 
             self.offset = self.start_drag_offset + (dx, dy)
 
         # collect the output
         if not self.io.outputs.empty():
             x, _ = Pos(self.screen.get_size())
-            self.prints[self.current_tick] = Message(self.io.outputs.get(), (x, 0), 'topright')
+            self.prints[self.current_tick] = Message(
+                self.io.outputs.get(), (x, 0), 'topright')
 
     def sync_ticks(self):
         """Get new ticks untill current_tick."""
@@ -296,7 +312,8 @@ class PygameDebugger:
         return font
 
     def get_current_message(self):
-        ticks = list(filter(lambda x: x <= self.current_tick, self.prints.keys()))
+        ticks = list(
+            filter(lambda x: x <= self.current_tick, self.prints.keys()))
         if ticks:
             return self.prints[sorted(ticks)[-1]]
 
@@ -304,10 +321,10 @@ class PygameDebugger:
         if char.isOper():
             return OPERATOR
         if char in '[{' and self.env.world.does_loc_exist(pos + Pos(1, 0)) and self.env.world.get_char_at(
-                        pos + Pos(1, 0)).isOper():
+                pos + Pos(1, 0)).isOper():
             return BRACKETS
         if char in '}]' and self.env.world.does_loc_exist(pos - Pos(1, 0)) and self.env.world.get_char_at(
-                        pos - Pos(1, 0)).isOper():
+                pos - Pos(1, 0)).isOper():
             return BRACKETS
         if char in '~*':
             return CONTROL_FLOW
