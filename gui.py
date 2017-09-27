@@ -261,9 +261,12 @@ class PygameDebugger:
             self.sync_ticks()
 
         for e in pygame.event.get():
-            if e.type == pygame.KEYDOWN:
+            if e.type == pygame.QUIT:
+                self.io.on_finish()
+                return
+            elif e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_ESCAPE:
-                    self.env.io.on_finish()
+                    self.io.on_finish()
                     return
                 elif e.key == pygame.K_RIGHT:
                     # move 5 steps if ctrl pressed
