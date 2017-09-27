@@ -55,13 +55,42 @@ COLORS = {
 }
 
 
+class Tooltip:
+    def __init__(self, pos):
+        self.tips = []  # type: List[pygame.SurfaceType]
+        self.pos = pos  # type: Pos
+
+    def add(self, object):
+        """Add an object that as a get_tooltip method that returns a surface with the tip"""
+        self.tips.append(object.get_tooltip())
+
+    def render(self, screen):
+        """Show all the tips to the screen."""
+        pos = self.pos
+
+        # we just blit each surface given via add() with a darker background
+        for tip in self.tips:
+
+            rect = tip.get_rect()  # type: pygame.rect.RectType
+            rect.topleft = pos
+
+            # we draw a dark background to better see the tip
+            points = rect.topleft, rect.topright, rect.bottomright, rect.bottomleft
+            pygame.gfxdraw.filled_polygon(screen, points, COLORS[BACKGROUND] + (180,))
+            # and blit the tip over it
+            screen.blit(tip, rect)
+
+            # we shift the bliting pos by the surfs height
+            pos += 0, tip.get_rect().height
+
+
 class Message:
     """Display a string in to the screen."""
     FONT = pygame.font.Font(FONTNAME, 2 * DEFAULT_FONT_SIZE)
 
     def __init__(self, text, pos, anchor='topleft'):
         self.text = str(text).replace('\n', '')
-        self.surf = self.get_surf(text)  # type: pygame.SurfaceType
+        self.surf = self.get_surf(self.text)  # type: pygame.SurfaceType
         self.pos = tuple(pos)
         self.anchor = anchor
 
@@ -95,23 +124,13 @@ class Dot:
         self.id = dot.id
         self.value = dot.value
 
-    def show(self, screen, pos):
-        """Display information about the dot value, id and state to the screen."""
-        # this is not an abomination because it is often chached
-        tooltip = self.get_tooltip(self.value, self.id, self.state)  # type: pygame.SurfaceType
-
-        rect = tooltip.get_rect()  # type: pygame.rect.RectType
-        rect.topleft = pos
-
-        points = rect.topleft, rect.topright, rect.bottomright, rect.bottomleft
-        pygame.gfxdraw.filled_polygon(screen, points, COLORS[BACKGROUND] + (180,))
-        screen.blit(tooltip, rect)
-
-        return rect
+    def get_tooltip(self):
+        """GEt a surface with Display information about the dot value, id and state to the screen."""
+        return self._get_tooltip(self.value, self.id, self.state)
 
     @classmethod
     @lru_cache(32)
-    def get_tooltip(cls, value, id_, state):
+    def _get_tooltip(cls, value, id_, state):
         """Get the surface with dot's info."""
         text = "#{} @{} ~{}".format(value, id_, state)
         hashsurf = cls.render_text('#')
@@ -174,6 +193,8 @@ class PygameDebugger:
         self.ticks = []  # type: List[List[Dot]]
         self.prints = {}  # type: Dict[int, Message]
 
+        self.more_debug = False
+
     def run(self):
         """Start the debugger. stop it with io.on_finish()"""
         while not self.env.io.finished:
@@ -213,6 +234,8 @@ class PygameDebugger:
                         self.current_tick = -1
                     elif e.key == pygame.K_a:
                         self.auto_tick = not self.auto_tick
+                    elif e.key == pygame.K_m:
+                        self.more_debug = not self.more_debug
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 self.start_drag_pos = mouse
                 self.start_drag_offset = self.offset
@@ -259,6 +282,7 @@ class PygameDebugger:
 
         mouse = pygame.mouse.get_pos()
 
+        # show every char of the map + dots via the background
         for row, line in enumerate(self.env.world.map):
             for col, char in enumerate(line):
                 c = char
@@ -283,14 +307,16 @@ class PygameDebugger:
         if current_msg:
             current_msg.render(self.screen)
 
-        # Tooltip
-        tooltip_pos = mouse + Pos(10, 10)
+        # Tooltips
+        tooltip = Tooltip(mouse + Pos(10, 10))
+        if self.more_debug:
+            pass
         for dot in self.current_dots:
             # if there is more than one dot at this place, we want to show only one
             # the first dot that has this pos
             if pygame.Rect(self.map_to_screen_pos(dot.pos), self.char_size).collidepoint(*mouse):
-                rect = dot.show(self.screen, tooltip_pos)
-                tooltip_pos += (0, rect.height)
+                tooltip.add(dot)
+        tooltip.render(self.screen)
 
     def new_font(self, size):
         size = min(80, max(2, size))  # clamp
