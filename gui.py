@@ -219,22 +219,22 @@ class PygameDebugger:
         self.start_drag_pos = None  # type: Pos
         self.start_drag_offset = None  # type: Pos
 
-        if retina:
-            w, h = pygame.display.list_modes()[0]
-            self.screen = pygame.display.set_mode(
-                (w, h), pygame.RESIZABLE)  # type: pygame.SurfaceType
-        else:
-            self.screen = pygame.display.set_mode(
-                (0, 0), pygame.NOFRAME)  # type: pygame.SurfaceType
+        self.screen = self.get_screen()  # type: pygame.SurfaceType
         self.clock = pygame.time.Clock()
-
-        self.tooltip = None  # type: Dot
 
         self.ticks = []  # type: List[List[Dot]]
         self.prints = {}  # type: Dict[int, Message]
         self.map = self.get_map(self.env)  # type: Map
 
         self.more_debug = False
+
+    def get_screen(self):
+        """Get the main screen."""
+        if self.retina:
+            w, h = pygame.display.list_modes()[0]
+            return pygame.display.set_mode((w, h), pygame.RESIZABLE)
+        else:
+            return pygame.display.set_mode((0, 0), pygame.NOFRAME)
 
     def get_map(self, env):
         map = copy.deepcopy(env.world.map)
@@ -308,13 +308,13 @@ class PygameDebugger:
         if self.start_drag_pos is not None:
             actual_pos = mouse
             dx, dy = actual_pos - self.start_drag_pos
+
             if not self.retina:
                 if abs(dx) < 20:
                     dx = 0
                 if abs(dy) < 20:
                     dy = 0
-
-            if self.retina:
+            else:
                 dx *= 2
                 dy *= 2
 
