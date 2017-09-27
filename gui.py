@@ -219,7 +219,6 @@ class PygameDebugger:
         self.start_drag_pos = None  # type: Pos
         self.start_drag_offset = None  # type: Pos
 
-        self.font = self.new_font(self.font_size)  # type: pygame.font.FontType
         if retina:
             w, h = pygame.display.list_modes()[0]
             self.screen = pygame.display.set_mode(

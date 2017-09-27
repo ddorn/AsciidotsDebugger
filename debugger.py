@@ -66,7 +66,6 @@ class CallbacksRelay(IOCallbacksStorage):
 
 @click.command()
 @click.argument('filename')
-@click.argument('filename')
 @click.option('--retina', default=False)
 def main(filename, retina):
     try:
