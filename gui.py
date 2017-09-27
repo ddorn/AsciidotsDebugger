@@ -43,6 +43,7 @@ ESCAPE_SEQUANCES = 10
 MODES = 11
 MSG = 12
 MSG_BG = 13
+MOREDEBUG_MSG = 14
 
 COLORS = {
     REGULAR: (248, 248, 242),
@@ -58,7 +59,8 @@ COLORS = {
     ESCAPE_SEQUANCES: (249, 38, 114),
     MODES: (166, 226, 46),
     MSG: (248, 248, 242),
-    MSG_BG: (62, 61, 50)
+    MSG_BG: (62, 61, 50),
+    MOREDEBUG_MSG: (253, 151, 31),
 }
 
 
@@ -130,11 +132,8 @@ class VisualChar:
         self.char = char
         self.color = color
 
-    def has_tip(self):
-        raise NotImplementedError
-
     def get_tooltip(self):
-        raise NotImplementedError
+        return MAINFONT.render_text(type(self.char).__name__, COLORS[MOREDEBUG_MSG])
 
     def render(self, screen, pos, dot_here=False):
         # background depends if there is a dot or not
@@ -346,8 +345,8 @@ class PygameDebugger:
                 char.render(self.screen, pos_on_screen, pos in dot_pos)
 
                 if self.more_debug:
-                    pass
-
+                    if rect.collidepoint(*mouse):
+                        tooltip.add(char)
 
         # Show output
         current_msg = self.get_current_message()
