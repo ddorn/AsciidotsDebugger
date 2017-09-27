@@ -9,6 +9,7 @@ class Font:
     """A wrapper around the pygame font system that caches the surfaces."""
 
     def __init__(self, name, size):
+        self._dependant_caches = []
         self.font_name = name
         self.font_size = round(size)
         self.char_size = None
@@ -22,6 +23,8 @@ class Font:
         # clear all caches
         self.render_char.cache_clear()
         self.render_text.cache_clear()
+        for dep in self._dependant_caches:
+            dep.cache_clear()
 
         font = pygame.font.Font(self.font_name, self.font_size)
         self.char_size = Pos(font.size("."))
@@ -42,6 +45,11 @@ class Font:
         return self.font.render(char, True, color, bg)  # type: pygame.SurfaceType
 
     @lru_cache(maxsize=128)
-    def render_text(self, text, color, bg):
+    def render_text(self, text, color, bg=None):
         """Draw text on a new surface. The last texts are cached."""
         return self.font.render(text, True, color, bg)  # type: pygame.SurfaceType
+
+    def clear_when_size_change(self, func):
+        """The cache of the decorated function will be cleared when the size of this font changes."""
+        self._dependant_caches.append(func)
+        return func
