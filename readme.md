@@ -32,13 +32,20 @@ With this, you will be able to:
 - But don't get lost in the code because you can reset the view
 - Enjoy even more the beauty of ascii-art with nice colors and font
 - Don't get distracted with the clean fullscreen
+- And *more debug* mode to debug Asciidots itself
 
-And in the future
+The *more debug* mode lets you:
+- Know the class of the chars
+
+###### And in the future
 - See the values of all dots at the same place
 - See all output at the same time
 - Edit the code directly in the app
 - Give inputs to your code
 - Make gifs of your code 
+
+In the more debug mode:
+- see where wraps lead
 
 ![Play with the time](assets/play_with_time.gif)
 
@@ -48,12 +55,13 @@ And in the future
 - <kbd>Left</kbd> : Previous step
 - <kbd>Ctrl + Right</kbd> : 5th next step
 - <kbd>Ctrl + Left</kbd> : 5th previous step
-- <kbd>Ctrl + A</kbd> : Auto advance in the execution
+- <kbd>Ctrl + A</kbd> : Toggle auto advance in the execution
 - <kbd>-</kbd> Decrease font size
 - <kbd>+</kbd> or <kbd>=</kbd> Increase font size
 - <kbd>Ctrl + B</kbd> Return to the beginning of the execution
 - <kbd>Ctrl + R</kbd> Reset the view (size and pos)
-- <kbd>Escape</kbd> To quit
+- <kbd>Escape</kbd> Quit
+- <kbd>Ctrl + M</kbd> Toggle the *more debug* mode
 - Click and drag to move the code
 
 ![Drag your code](assets/move_around.gif)
