@@ -97,27 +97,24 @@ class Tooltip:
 
 class Message:
     """Display a string in to the screen."""
-    FONT = pygame.font.Font(FONTNAME, 2 * DEFAULT_FONT_SIZE)
 
     def __init__(self, text, pos, anchor='topleft'):
         self.text = str(text).replace('\n', '')
-        self.surf = self.get_surf(self.text)  # type: pygame.SurfaceType
         self.pos = tuple(pos)
         self.anchor = anchor
 
-    def render(self, surf):
-        rect = self.surf.get_rect()
+    def render(self, screen):
+        surf = self.get_surf()
+        rect = surf.get_rect()
         setattr(rect, self.anchor, self.pos)
-        surf.blit(self.surf, rect)
+        screen.blit(surf, rect)
 
-    def new_font(self, size):
-        self.FONT = pygame.font.Font(FONTNAME, size)
-        self.surf = self.get_surf(self.text)
-
-    @staticmethod
-    @lru_cache(maxsize=128)
-    def get_surf(text):
-        return Message.FONT.render(text, 1, COLORS[MSG], COLORS[MSG_BG]).convert()
+    def get_surf(self):
+        if len(self.text) == 1:
+            render = BIGFONT.render_char
+        else:
+            render = BIGFONT.render_text
+        return render(self.text, COLORS[MSG], COLORS[MSG_BG]).convert()
 
 
 class VisualChar:
@@ -259,14 +256,20 @@ class PygameDebugger:
                     self.current_tick = max(-1, self.current_tick - 1 - 4 * (e.mod & pygame.KMOD_CTRL != 0))
                 elif e.key == pygame.K_EQUALS:  # I would like the + but apparently it doesn't work
                     MAINFONT.change_size(1)
+                    BIGFONT.set_size(MAINFONT.font_size * 2)
+                    SMALLFONT.set_size(MAINFONT.font_size * 0.75)
                 elif e.key == pygame.K_MINUS:
                     MAINFONT.change_size(-1)
+                    BIGFONT.set_size(MAINFONT.font_size * 2)
+                    SMALLFONT.set_size(MAINFONT.font_size * 0.75)
                 elif e.mod & pygame.KMOD_CTRL:
                     if e.key == pygame.K_r:  # reset position and size
                         self.start_drag_pos = None
                         self.start_drag_offset = None
                         self.offset = Pos(5, 5)
                         MAINFONT.set_size(DEFAULT_FONT_SIZE)
+                        BIGFONT.set_size(MAINFONT.font_size * 2)
+                        SMALLFONT.set_size(MAINFONT.font_size * 0.75)
                     elif e.key == pygame.K_b:  # go back to the beginning
                         self.current_tick = -1
                     elif e.key == pygame.K_a:  # toggle autotick
