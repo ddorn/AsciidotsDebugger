@@ -90,6 +90,7 @@ class Tooltip:
 
         # we just blit each surface given via add() with a darker background
         for tip in self.tips:
+
             rect = tip.get_rect()  # type: pygame.rect.RectType
             rect.topleft = pos
             rect.width = width
@@ -97,12 +98,32 @@ class Tooltip:
             # we draw a dark background to better see the tip
             points = rect.topleft, rect.topright, rect.bottomright, rect.bottomleft
             pygame.gfxdraw.filled_polygon(screen, points, COLORS[BACKGROUND] + (180,))
-            # and blit the tip over it
-            screen.blit(tip, rect)
+
+            # and blit the tip over it or just draw a line if it's a separation
+            if tip is self.separation:
+                pygame.gfxdraw.hline(screen, rect.left, rect.right, rect.centery, COLORS[MSG])
+            else:
+                screen.blit(tip, rect)
 
             # we shift the bliting pos by the surfs height
             pos += 0, tip.get_rect().height + 1
 
+    class separation:
+        """
+        You are reading the documentation of an ugly way to add separators un a Tooltip.
+        This is the worst ducktyping ever. But well, it works...
+        """
+        @staticmethod
+        def get_tooltip():
+            return Tooltip.separation
+
+        @staticmethod
+        def get_width():
+            return 1
+
+        @staticmethod
+        def get_rect():
+            return pygame.Rect(0, 0, 0, 3)
 
 # this will be removed one day
 class Message:
@@ -367,6 +388,7 @@ class PygameDebugger:
                 if self.more_debug:
                     if rect.collidepoint(*mouse):
                         tooltip.add(char)
+                        tooltip.add(Tooltip.separation)
 
         # Show output
         current_msg = self.get_current_message()
@@ -374,8 +396,6 @@ class PygameDebugger:
             current_msg.render(self.screen)
 
         # Tooltips
-        if self.more_debug:
-            pass
         for dot in self.current_dots:
             # if there is more than one dot at this place, we want to show only one
             # the first dot that has this pos
