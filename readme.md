@@ -7,7 +7,7 @@
 The beautiful [Asciidot language](https://github.com/aaronduino/asciidots) 
 develloped by Aaron Janse is inspired by ascii-art and electronic circuits.
 
-You may want to try it online [here](https://asciidots.herokuapp.com/)
+You may want to try it online [here](http://ajanse.me/asciidots/)
 or by cloning the [repo](https://github.com/aaronduino/asciidots).
 
     git clone https://github.com/aaronduino/asciidots
