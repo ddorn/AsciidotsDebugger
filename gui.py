@@ -7,6 +7,7 @@ import pygame
 import pygame.gfxdraw
 
 from dots.vector import Pos
+from dots.chars import SingletonLibInnerWarpChar
 
 from visual.font import Font
 
@@ -412,7 +413,7 @@ class PygameDebugger:
                         tooltip.add(Tooltip.separation)
 
                         # we will draw (later) the connected wrap with an othe background
-                        if char.char.isWarp() and not char.char.isSingletonLibReturnWarp():
+                        if char.char.isWarp() and not isinstance(char.char, SingletonLibInnerWarpChar):
                             companion = char.char.get_dest_loc()
 
         # redraw the companion char of the current wrap with another bacground
