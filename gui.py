@@ -233,18 +233,38 @@ class PygameDebugger:
         self.current_tick = -1
         self.auto_tick = False
 
-        self.offset = Pos(5, 5)
-        self.start_drag_pos = None  # type: Pos
-        self.start_drag_offset = None  # type: Pos
-
-        self.screen = self.get_screen()  # type: pygame.SurfaceType
-        self.clock = pygame.time.Clock()
-
         self.ticks = []  # type: List[List[Dot]]
         self.prints = {}  # type: Dict[int, Message]
         self.map = self.get_map(self.env)  # type: Map
 
+        self.screen = self.get_screen()  # type: pygame.SurfaceType
+        self.clock = pygame.time.Clock()
+
+        self.offset = self.get_default_offset()
+        self.start_drag_pos = None  # type: Pos
+        self.start_drag_offset = None  # type: Pos
+
         self.more_debug = False
+
+    def get_default_offset(self):
+        width = max(len(line) for line in self.map)
+        height = len(self.map)
+
+        self.offset = Pos(0, 0)
+        width, height = self.map_to_screen_pos(Pos(width, height))
+        sw, sh = self.screen.get_size()
+
+        if width > sw:
+            outw = 5
+        else:
+            outw = (sw - width) / 2
+
+        if height > sh:
+            outh = 5
+        else:
+            outh = (sh - height) / 2
+
+        return Pos(outw, outh)
 
     def get_screen(self):
         """Get the main screen."""
@@ -307,11 +327,11 @@ class PygameDebugger:
                     if e.key == pygame.K_r:  # reset position and size
                         self.start_drag_pos = None
                         self.start_drag_offset = None
-                        self.offset = Pos(5, 5)
                         MAINFONT.set_size(DEFAULT_FONT_SIZE)
                         BIGFONT.set_size(MAINFONT.font_size * 2)
                         SMALLFONT.set_size(MAINFONT.font_size * 0.75)
                         self.map_to_screen_pos.cache_clear()
+                        self.offset = self.get_default_offset()
                     elif e.key == pygame.K_b:  # go back to the beginning
                         self.current_tick = -1
                     elif e.key == pygame.K_a:  # toggle autotick
