@@ -272,7 +272,7 @@ class PygameDebugger:
             self.clock.tick(self.FPS)
 
     def update(self):
-        mouse = Pos(pygame.mouse.get_pos())
+        mouse = Pos(self._get_mouse_pos())
 
         if self.auto_tick:
             self.current_tick += 1
@@ -333,14 +333,10 @@ class PygameDebugger:
             actual_pos = mouse
             dx, dy = actual_pos - self.start_drag_pos
 
-            if not self.retina:
-                if abs(dx) < 20:
-                    dx = 0
-                if abs(dy) < 20:
-                    dy = 0
-            else:
-                dx *= 2
-                dy *= 2
+            if abs(dx) < 20:
+                dx = 0
+            if abs(dy) < 20:
+                dy = 0
 
             self.offset = self.start_drag_offset + (dx, dy)
             self.map_to_screen_pos.cache_clear()
@@ -370,7 +366,7 @@ class PygameDebugger:
         else:
             dot_pos = {dot.pos for dot in self.ticks[self.current_tick]}
 
-        mouse = pygame.mouse.get_pos()
+        mouse = self._get_mouse_pos()
         tooltip = Tooltip(mouse + Pos(10, 10))
         screen_rect = self.screen.get_rect()
 
@@ -448,6 +444,13 @@ class PygameDebugger:
             return MODES
 
         return REGULAR
+
+    def _get_mouse_pos(self):
+        x, y = pygame.mouse.get_pos()
+        if self.retina:
+            x *= 2
+            y *= 2
+        return (x, y)
 
     @property
     def current_dots(self):
