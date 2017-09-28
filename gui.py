@@ -151,14 +151,14 @@ class Message:
 class VisualChar:
     def __init__(self, char, color):
         self.char = char
-        self.color = color
+        self.color = COLORS[color]
 
     def get_tooltip(self):
         return MAINFONT.render_text(type(self.char).__name__, COLORS[MOREDEBUG])
 
     def render(self, screen, pos, bg_code):
         # background depends if there is a dot or not
-        surf = MAINFONT.render_char(self.char, COLORS[self.color], COLORS[bg_code])
+        surf = MAINFONT.render_char(self.char, self.color, COLORS[bg_code])
         screen.blit(surf, pos)
 
 
@@ -297,10 +297,12 @@ class PygameDebugger:
                     MAINFONT.change_size(1)
                     BIGFONT.set_size(MAINFONT.font_size * 2)
                     SMALLFONT.set_size(MAINFONT.font_size * 0.75)
+                    self.map_to_screen_pos.cache_clear()
                 elif e.key == pygame.K_MINUS:
                     MAINFONT.change_size(-1)
                     BIGFONT.set_size(MAINFONT.font_size * 2)
                     SMALLFONT.set_size(MAINFONT.font_size * 0.75)
+                    self.map_to_screen_pos.cache_clear()
                 elif e.mod & pygame.KMOD_CTRL:
                     if e.key == pygame.K_r:  # reset position and size
                         self.start_drag_pos = None
@@ -309,6 +311,7 @@ class PygameDebugger:
                         MAINFONT.set_size(DEFAULT_FONT_SIZE)
                         BIGFONT.set_size(MAINFONT.font_size * 2)
                         SMALLFONT.set_size(MAINFONT.font_size * 0.75)
+                        self.map_to_screen_pos.cache_clear()
                     elif e.key == pygame.K_b:  # go back to the beginning
                         self.current_tick = -1
                     elif e.key == pygame.K_a:  # toggle autotick
@@ -340,6 +343,7 @@ class PygameDebugger:
                 dy *= 2
 
             self.offset = self.start_drag_offset + (dx, dy)
+            self.map_to_screen_pos.cache_clear()
 
         # collect the output
         if not self.io.outputs.empty():
@@ -353,6 +357,7 @@ class PygameDebugger:
             tick = self._get_new_tick()
             self.ticks.append([Dot(dot) for dot in tick])
 
+    @lru_cache(maxsize=None)
     def map_to_screen_pos(self, pos):
         """Convert the position of char/dot in the map to its coordinates in the screen."""
         return self.offset.x + MAINFONT.char_size.x * pos.col, self.offset.y + MAINFONT.char_size.y * pos.row
