@@ -62,7 +62,7 @@ class CallbacksRelay(IOCallbacksStorage):
 
 @click.command()
 @click.argument('filename')
-@click.option('--retina', default=False)
+@click.option('--retina', is_flag=True, default=False)
 def main(filename, retina):
     try:
         env = Env()
