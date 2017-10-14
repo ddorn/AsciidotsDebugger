@@ -6,6 +6,7 @@ from typing import Dict, List
 import pygame
 import pygame.gfxdraw
 
+from dots.states import TwoDotState
 from dots.vector import Pos
 from dots.chars import SingletonLibInnerWarpChar
 
@@ -45,7 +46,7 @@ ESCAPE_SEQUANCES = 10
 MODES = 11
 MSG = 12
 MSG_BG = 13
-MOREDEBUG = 14
+MOREDEBUG_COLOR = 14
 
 COLORS = {
     REGULAR: (248, 248, 242),
@@ -62,9 +63,10 @@ COLORS = {
     MODES: (166, 226, 46),
     MSG: (248, 248, 242),
     MSG_BG: (62, 61, 50),
-    MOREDEBUG: (253, 151, 31),
+    MOREDEBUG_COLOR: (253, 151, 31),
 }
 
+MORE_DEBUG = False
 
 class Tooltip:
     """Display a list of infos about objects."""
@@ -155,7 +157,7 @@ class VisualChar:
         self.color = COLORS[color]
 
     def get_tooltip(self):
-        return MAINFONT.render_text(type(self.char).__name__, COLORS[MOREDEBUG])
+        return MAINFONT.render_text(type(self.char).__name__, COLORS[MOREDEBUG_COLOR])
 
     def render(self, screen, pos, bg_code):
         # background depends if there is a dot or not
@@ -176,31 +178,48 @@ class Dot:
         self.state = str(dot.state)
         self.id = dot.id
         self.value = dot.value
+        self.wait = None if not isinstance(dot.state, TwoDotState) else dot.state.age  # type: int
 
     def get_tooltip(self):
         """Get a surface with Display information about the dot value, id and state to the screen."""
+        if MORE_DEBUG:
+            print(self.wait)
+            return self._get_tooltip(self.value, self.id, self.state, self.wait)
         return self._get_tooltip(self.value, self.id, self.state)
 
     @classmethod
     @MAINFONT.clear_when_size_change
     @lru_cache(32)
-    def _get_tooltip(cls, value, id_, state):
+    def _get_tooltip(cls, value, id_, state, waiting=None):
         """Get the surface with dot's info."""
         text = "#{} @{} ~{}".format(value, id_, state)
+
+        if waiting is not None:
+            text += " W{}".format(waiting)
+
         hashsurf = cls.render_text('#')
         value = cls.render_text(str(value))
         sep = cls.render_text(' ')
         atsurf = cls.render_text('@')
         idsurf = cls.render_text(str(id_))
         state_sep = cls.render_text('~')
-        end = cls.render_text(state)
+        state = cls.render_text(state)
+
+        if waiting is not None:
+            wait_sep = cls.render_text('W')
+            wait = cls.render_text(str(waiting))
 
         pos = 0
         surf = pygame.Surface(MAINFONT.size(text))
         surf.set_colorkey((0, 0, 0))
-        for s in (hashsurf, value, sep, atsurf, idsurf, sep, state_sep, end):
+        for s in (hashsurf, value, sep, atsurf, idsurf, sep, state_sep, state):
             surf.blit(s, (pos, 0))
             pos += s.get_width()
+
+        if waiting is not None:
+            for s in (sep, wait_sep, wait):
+                surf.blit(s, (pos, 0))
+                pos += s.get_width()
 
         return surf
 
@@ -214,6 +233,9 @@ class Dot:
             return MAINFONT.render_char(text, COLORS[OPERATOR])
         if text == '~':
             return MAINFONT.render_char(text, COLORS[CONTROL_FLOW])
+        if text == 'W':
+            return MAINFONT.render_char(text, COLORS[MOREDEBUG_COLOR])
+
         return MAINFONT.render_text(text, COLORS[MSG])
 
 
@@ -244,8 +266,6 @@ class PygameDebugger:
         self.offset = self.get_default_offset()
         self.start_drag_pos = None  # type: Pos
         self.start_drag_offset = None  # type: Pos
-
-        self.more_debug = False
 
     def get_default_offset(self):
         width = max(len(line) for line in self.map)
@@ -293,6 +313,8 @@ class PygameDebugger:
             self.clock.tick(self.FPS)
 
     def update(self):
+        global MORE_DEBUG
+
         mouse = Pos(self._get_mouse_pos())
 
         if self.auto_tick:
@@ -338,7 +360,7 @@ class PygameDebugger:
                     elif e.key == pygame.K_a:  # toggle autotick
                         self.auto_tick = not self.auto_tick
                     elif e.key == pygame.K_m:  # toggle more_debug
-                        self.more_debug = not self.more_debug
+                        MORE_DEBUG = not MORE_DEBUG
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 self.start_drag_pos = mouse
                 self.start_drag_offset = self.offset
@@ -406,7 +428,7 @@ class PygameDebugger:
 
                 char.render(self.screen, pos_on_screen, [BACKGROUND, DOT][pos in dot_pos])
 
-                if self.more_debug:
+                if MORE_DEBUG:
                     if rect.collidepoint(*mouse):
                         # show the class of chars
                         tooltip.add(char)
@@ -419,7 +441,7 @@ class PygameDebugger:
         # redraw the companion char of the current wrap with another bacground
         if companion:
             char = self.map[companion.row][companion.col]
-            char.render(self.screen, self.map_to_screen_pos(companion), MOREDEBUG)
+            char.render(self.screen, self.map_to_screen_pos(companion), MOREDEBUG_COLOR)
 
         # Show output
         current_msg = self.get_current_message()
