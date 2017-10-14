@@ -7,7 +7,7 @@ import click
 
 import gui
 from dots.interpreter import AsciiDotsInterpreter
-from dots.environement import Env
+from dots.environment import Env
 from dots.callbacks import IOCallbacksStorage
 
 
