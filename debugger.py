@@ -57,11 +57,7 @@ class CallbacksRelay(IOCallbacksStorage):
         self.env.interpreter.terminate()
 
     def get_input(self):
-        self.input_request = True
-        input_ = self.inputs.get()
-        self.input_request = False
-
-        return input_
+        return input()
 
 
 @click.command()
