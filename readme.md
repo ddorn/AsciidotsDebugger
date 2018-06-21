@@ -70,28 +70,13 @@ The *more debug* mode lets you:
 
 The grapical interface is based on pygame, so you need to have it installed. 
 The command line interface uses click, you must have it too.
-Of course, you need and asciidots interpreter.
+Of course, you need an asciidots interpreter.
 
-    pip install pygame click
-    git clone https://github.com/aaronduino/asciidots   
+    pip install pygame click asciidots
     git clone https://github.com/ddorn/AsciidotsDebugger
     cd AsciidotsDebugger
 
-You need to tell where asciidot is installed (replace `../asciidots`  if it is not your location).
-This will create two symbolic links to the interpreter `dots/` and the libs `libs/`.
-
-    
-Windows:
-
-    set-asciidots-dir.cmd ..\asciidots 
-
-
-Linux/Mac:
-
-    chmod +x set-asciidots-dir.sh
-    ./set-asciidots-dir.sh ../asciidots
-
-Try it ! You can find more examples of Asciidots programs in the official repo along with the documentation of the language.
+That's it, now you can try it ! You can find more examples of Asciidots programs in the official repo along with the documentation of the language.
     
     python debugger.py samples/primes.dots
 
