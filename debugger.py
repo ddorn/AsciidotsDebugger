@@ -58,7 +58,7 @@ class CallbacksRelay(IOCallbacksStorage):
         self.finished = True
         self.env.interpreter.terminate()
 
-    def get_input(self):
+    def get_input(self, ascii_char=False):
         return input()
 
 

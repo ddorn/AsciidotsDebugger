@@ -26,7 +26,7 @@ pygame.init()
 pygame.key.set_repeat(200, 10)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-FONTNAME = 'assets/monaco.ttf'
+FONTNAME = os.path.join(os.path.dirname(__file__), 'assets', 'monaco.ttf')
 DEFAULT_FONT_SIZE = 24
 MAINFONT = Font(FONTNAME, DEFAULT_FONT_SIZE)
 SMALLFONT = Font(FONTNAME, DEFAULT_FONT_SIZE * 0.75)
